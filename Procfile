@@ -1,1 +1,1 @@
-web: cd dist && http-server
+web: parcel index.html
