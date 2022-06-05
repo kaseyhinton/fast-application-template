@@ -1,0 +1,33 @@
+{
+  "name": "lit-application-template",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "start": "parcel index.html",
+    "build": "parcel build",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "@vaadin/app-layout": "^23.0.11",
+    "@vaadin/button": "^23.0.11",
+    "@vaadin/dialog": "^23.0.11",
+    "@vaadin/horizontal-layout": "^23.0.11",
+    "@vaadin/icon": "^23.0.11",
+    "@vaadin/icons": "^23.0.11",
+    "@vaadin/select": "^23.0.11",
+    "@vaadin/tabs": "^23.0.11",
+    "@vaadin/text-field": "^23.0.11",
+    "@vaadin/vaadin-avatar": "^23.0.11",
+    "@vaadin/vaadin-grid": "^23.0.11",
+    "@vaadin/vaadin-material-styles": "^23.0.11",
+    "@vaadin/vertical-layout": "^23.0.11",
+    "dayjs": "^1.11.1",
+    "lit": "^2.2.2",
+    "page": "^1.11.6",
+    "http-server": "14.1.1"
+  },
+  "devDependencies": {
+    "parcel": "^2.6.0",
+    "process": "^0.11.10"
+  }
+}
