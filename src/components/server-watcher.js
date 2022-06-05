@@ -1,5 +1,8 @@
 import { LitElement, html, css, render } from "lit";
 import { badge } from "@vaadin/vaadin-lumo-styles/badge";
+import { Notification } from "@vaadin/notification";
+import { get } from "httpie";
+
 import styles from "../styles/styles";
 
 import "@vaadin/grid";
@@ -19,7 +22,9 @@ class ServerWatcher extends LitElement {
     _newserverIP: { type: String, state: true },
     items: { type: Array, state: true },
     _selectedPingInterval: { type: String, state: true },
+    _intervals: { type: Array, state: true },
     pingIntervals: { type: Array, state: true },
+    notificationOpened: { type: Boolean, state: true },
   };
 
   constructor() {
@@ -53,10 +58,69 @@ class ServerWatcher extends LitElement {
         value: "3600000",
       },
     ];
+
+    this.items.forEach((item) => {
+      this.runServerWatch(item);
+    });
+
+    this._intervals = [];
+    this.runIntervals();
   }
 
   firstUpdated() {
     this._dialog = this.shadowRoot?.querySelector("my-dialog");
+  }
+
+  runIntervals() {
+    this.items.forEach((item) => {
+      const interval = setInterval(() => {
+        this.runServerWatch(item);
+      }, this._selectedPingInterval);
+
+      this._intervals.push(interval);
+    });
+  }
+
+  clearIntervals() {
+    this._intervals.forEach((interval) => {
+      clearInterval(interval);
+    });
+  }
+
+  async runServerWatch(server) {
+    const result = await this.getDataFromIP(server.ipaddress);
+    const idx = this.items.findIndex((i) => i.ipaddress === server.ipaddress);
+    console.log(result);
+    server.status = result;
+    this.items.splice(idx, 1, server);
+    localStorage.setItem("server-watcher-list", JSON.stringify(this.items));
+    this.items = [...this.items];
+  }
+
+  async getDataFromIP(ipaddress) {
+    try {
+      const { data } = await get(
+        `https://serverwatch.kaseyhinton.com/server/${ipaddress}`
+      );
+      return data;
+    } catch (err) {
+      return "Error";
+    }
+  }
+
+  openNotification(message, theme, position) {
+    const notification = Notification.show(message, {
+      position,
+    });
+    notification.setAttribute("theme", theme);
+    this.notificationOpened = true;
+    const handleOpenChanged = (event) => {
+      if (!event.detail.value) {
+        this.notificationOpened = false;
+        notification.removeEventListener("opened-changed", handleOpenChanged);
+      }
+    };
+    notification.addEventListener("opened-changed", handleOpenChanged);
   }
 
   static styles = [
@@ -94,6 +158,8 @@ class ServerWatcher extends LitElement {
               "server-watcher-selected-ping-interval",
               event.target.value
             );
+            this.clearIntervals();
+            this.runIntervals();
           }}
           .value="${this._selectedPingInterval ??
           this.pingIntervals[this.pingIntervals.length - 1].value}"
@@ -104,7 +170,6 @@ class ServerWatcher extends LitElement {
         <vaadin-grid-sort-column
           header="Name"
           path="name"
-          flex-grow="0"
           auto-width
         ></vaadin-grid-sort-column>
         <vaadin-grid-sort-column
@@ -143,12 +208,14 @@ class ServerWatcher extends LitElement {
             <h1>server</h1>
             <main>
               <vaadin-text-field
+                .value=${this._newserverName}
                 @input=${(event) => {
                   this._newserverName = event.target.value;
                 }}
                 label="Name"
               ></vaadin-text-field>
               <vaadin-text-field
+                .value=${this._newserverName}
                 @input=${(event) => {
                   this._newserverIP = event.target.value;
                 }}
@@ -174,10 +241,12 @@ class ServerWatcher extends LitElement {
                       status: "Pending",
                     },
                   ];
-                  localStorage.setItem(
-                    "server-watcher-list",
-                    JSON.stringify(this.items)
+
+                  const item = this.items.find(
+                    (i) => i.ipaddress === this._newserverIP
                   );
+                  this.runServerWatch(item);
+
                   this._newserverName = "";
                   this._newserverIP = "";
                   this._dialog.close();
@@ -201,7 +270,19 @@ class ServerWatcher extends LitElement {
     render(
       html`
         <vaadin-horizontal-layout theme="spacing">
-          <vaadin-button title="Run" theme="icon" aria-label="Close">
+          <vaadin-button
+            @click=${async () => {
+              this.openNotification(
+                `Running ${server.ipaddress}`,
+                "primary",
+                "top-end"
+              );
+              this.runServerWatch(server);
+            }}
+            title="Run"
+            theme="icon"
+            aria-label="Close"
+          >
             <vaadin-icon icon="vaadin:refresh"></vaadin-icon>
           </vaadin-button>
           <vaadin-button
