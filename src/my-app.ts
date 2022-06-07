@@ -32,7 +32,7 @@ import {
 } from "@microsoft/fast-element";
 import { provideDesignSystem } from "@divriots/starter-furious";
 
-import "./components/server-watcher";
+import "./components/server-watcher/server-watcher";
 
 provideDesignSystem().register();
 
