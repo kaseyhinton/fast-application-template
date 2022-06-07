@@ -1,1 +1,1 @@
-web: parcel index.html --port $PORT
+web: parcel index.html
