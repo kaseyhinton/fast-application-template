@@ -1,1 +1,1 @@
-# lit-application-template
+# fast-application-template
