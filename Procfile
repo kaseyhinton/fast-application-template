@@ -1,1 +1,1 @@
-web: parcel build && parcel dist/index.html
+web: parcel index.html --no-hmr --port=$PORT
