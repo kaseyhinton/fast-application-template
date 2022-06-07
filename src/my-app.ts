@@ -3,16 +3,37 @@ import {
   accentPalette as accentPaletteToken,
   PaletteRGB,
   SwatchRGB,
-  allComponents,
+} from "@microsoft/fast-components";
+import {
+  fastButton,
+  fastTextField,
+  fastDialog,
+  fastSelect,
+  fastOption,
+  fastToolbar,
   provideFASTDesignSystem,
 } from "@microsoft/fast-components";
+
+provideFASTDesignSystem().register(
+  fastButton(),
+  fastTextField(),
+  fastDialog(),
+  fastSelect(),
+  fastOption(),
+  fastToolbar()
+);
 import { parseColorHexRGB } from "@microsoft/fast-colors";
-import { FASTElement, html, css } from "@microsoft/fast-element";
+import {
+  FASTElement,
+  html,
+  css,
+  customElement,
+  attr,
+} from "@microsoft/fast-element";
 import { provideDesignSystem } from "@divriots/starter-furious";
 
 import "./components/server-watcher";
 
-provideFASTDesignSystem().register(allComponents);
 provideDesignSystem().register();
 
 const template = html`
@@ -39,28 +60,29 @@ const styles = css`
     visibility: hidden;
   }
 `;
-
-export class MyApp extends FASTElement {
-  static definition = {
-    name: "my-app",
-    template,
-    styles,
-    attributes: ["page"],
-  };
+@customElement({
+  name: "my-app",
+  template,
+  styles,
+})
+class MyApp extends FASTElement {
+  @attr page = "";
 
   connectedCallback() {
     super.connectedCallback();
 
     const color = parseColorHexRGB("#335599");
-    const swatch = SwatchRGB.from(color);
-    const palette = PaletteRGB.create(swatch);
-    accentPaletteToken.setValueFor(this, palette);
+    if (color) {
+      const swatch = SwatchRGB.from(color);
+      const palette = PaletteRGB.create(swatch);
+      accentPaletteToken.setValueFor(this, palette);
+    }
 
     page("/", async () => {
       page.show("/server-watcher");
     });
 
-    page("/server-watcher", (ctx) => {
+    page("/server-watcher", () => {
       this.page = "server-watcher";
     });
 
@@ -72,4 +94,4 @@ export class MyApp extends FASTElement {
   }
 }
 
-FASTElement.define(MyApp);
+export default MyApp;

@@ -1,17 +1,35 @@
 import { get } from "httpie";
-import { FASTElement, html, css, repeat } from "@microsoft/fast-element";
+import {
+  FASTElement,
+  html,
+  css,
+  repeat,
+  observable,
+  customElement,
+} from "@microsoft/fast-element";
+import { TextField } from "@microsoft/fast-components";
 
-const template = html`
+export type Server = {
+  name: string;
+  ipaddress: string;
+  status: string;
+};
+
+const template = html<ServerWatcher>`
   <h1 spacing-bottom>Server Watcher</h1>
 
   <horizontal-row between spacing-bottom>
-    <fast-button @click=${(x, c) => (x.dialogOpen = true)} appearance="accent"
+    <fast-button
+      @click=${(x, c) => {
+        x.dialogOpen = true;
+      }}
+      appearance="accent"
       >Connect server</fast-button
     >
     <fast-select
-      :value=${(x) => x.selectedPingInterval ?? "3600000"}
+      :value=${(x) => x.selectedPingInterval}
       @change=${(x, c) => {
-        x.selectedPingInterval = c.event.target.value;
+        x.selectedPingInterval = (c?.event?.target as any)?.value;
         localStorage.setItem(
           "server-watcher-selected-ping-interval",
           x.selectedPingInterval
@@ -29,7 +47,7 @@ const template = html`
   </horizontal-row>
   <server-items>
     ${repeat(
-      (x) => x.items,
+      (x) => x.servers,
       html`
         <server-item>
           ${(x) => x.name} ${(x) => x.ipaddress} ${(x) => x.status}
@@ -42,13 +60,15 @@ const template = html`
           </fast-button>
           <fast-button
             @click=${(x, c) => {
-              c.parent.items = c.parent.items.filter(
-                (i) => i.ipaddress !== x.ipaddress
+              c.parent.servers = c.parent.servers.filter(
+                (server: Server) => server.ipaddress !== x.ipaddress
               );
               localStorage.setItem(
                 "server-watcher-list",
                 JSON.stringify(
-                  c.parent.items.filter((i) => i.ipaddress !== x.ipaddress)
+                  c.parent.servers.filter(
+                    (server: Server) => server.ipaddress !== x.ipaddress
+                  )
                 )
               );
             }}
@@ -66,9 +86,8 @@ const template = html`
     >
       <h2>Server</h2>
       <fast-text-field
-        style="width: 100%"
         @input=${(x, c) => {
-          x.newServerName = c.event.target.value;
+          x.newServerName = (c.event.target! as TextField)?.value;
         }}
         :value=${(x) => x.newServerName}
         placeholder="Name"
@@ -76,7 +95,7 @@ const template = html`
 
       <fast-text-field
         @input=${(x, c) => {
-          x.newServerIP = c.event.target.value;
+          x.newServerIP = (c.event.target! as TextField)?.value;
         }}
         :value=${(x) => x.newServerIP}
         placeholder="IP Address"
@@ -84,19 +103,15 @@ const template = html`
       <button-container>
         <fast-button @click=${(x) => (x.dialogOpen = false)}>Close</fast-button>
         <fast-button
-          @click=${(x, c) => {
-            x.items = [
-              ...x.items,
-              {
-                name: x._newServerName,
-                ipaddress: x._newServerIP,
-                status: "Pending",
-              },
-            ];
+          @click=${(x) => {
+            const newServer = {
+              name: x.newServerName,
+              ipaddress: x.newServerIP,
+              status: "Pending",
+            } as Server;
 
-            const item = x.items.find((i) => i.ipaddress === x._newServerIP);
-
-            x.runServerWatch(item);
+            x.servers.push(newServer);
+            x.runServerWatch(newServer);
             x.newServerName = "";
             x.newServerIP = "";
             x.dialogOpen = false;
@@ -133,6 +148,22 @@ const styles = css`
     align-items: center;
   }
 
+  fast-dialog {
+    --dialog-height: auto;
+    --dialog-width: auto;
+  }
+
+  fast-dialog h2 {
+    margin-top: 0;
+  }
+
+  button-container {
+    display: flex;
+    margin-top: 24px;
+    justify-content: flex-end;
+    gap: 24px;
+  }
+
   [spacing-bottom] {
     margin-bottom: 24px;
   }
@@ -142,41 +173,43 @@ const styles = css`
   }
 `;
 
+@customElement({
+  name: "server-watcher",
+  template,
+  styles,
+})
 class ServerWatcher extends FASTElement {
-  static definition = {
-    name: "server-watcher",
-    template,
-    styles,
-    attributes: [
-      "newServerName",
-      "newServerIP",
-      "items",
-      "selectedPingInterval",
-      "intervals",
-      "dialogOpen",
-    ],
-  };
+  @observable newServerName: string = "";
+  @observable newServerIP: string = "";
+  @observable selectedPingInterval: string = "3600000";
+  @observable dialogOpen: boolean = false;
+  @observable intervals: Array<number> = [];
+  @observable servers: Array<Server> = [];
 
   constructor() {
     super();
     const serverWatcherList = localStorage.getItem("server-watcher-list");
-    this.items = serverWatcherList ? JSON.parse(serverWatcherList) : [];
-    this.selectedPingInterval =
-      localStorage.getItem("server-watcher-selected-ping-interval") ?? 3600000;
+    this.servers = serverWatcherList ? JSON.parse(serverWatcherList) : [];
 
-    this.items.forEach((item) => {
-      this.runServerWatch(item);
+    const pingInterval = localStorage.getItem(
+      "server-watcher-selected-ping-interval"
+    );
+    if (pingInterval) {
+      this.selectedPingInterval = pingInterval;
+    }
+
+    this.servers.forEach((server) => {
+      this.runServerWatch(server);
     });
 
-    this.intervals = [];
     this.runIntervals();
   }
 
   runIntervals() {
-    this.items.forEach((item) => {
+    this.servers.forEach((server) => {
       const interval = setInterval(() => {
-        this.runServerWatch(item);
-      }, this.selectedPingInterval);
+        this.runServerWatch(server);
+      }, Number(this.selectedPingInterval));
 
       this.intervals.push(interval);
     });
@@ -188,18 +221,15 @@ class ServerWatcher extends FASTElement {
     });
   }
 
-  async runServerWatch(server) {
-    console.log(server);
+  async runServerWatch(server: Server) {
     const result = await this.getDataFromIP(server.ipaddress);
-    const idx = this.items.findIndex((i) => i.ipaddress === server.ipaddress);
-    console.log(result);
+    const idx = this.servers.findIndex((s) => s.ipaddress === server.ipaddress);
     server.status = result;
-    this.items.splice(idx, 1, server);
-    localStorage.setItem("server-watcher-list", JSON.stringify(this.items));
-    this.items = [...this.items];
+    this.servers.splice(idx, 1, JSON.parse(JSON.stringify(server)));
+    localStorage.setItem("server-watcher-list", JSON.stringify(this.servers));
   }
 
-  async getDataFromIP(ipaddress) {
+  async getDataFromIP(ipaddress: string) {
     try {
       const { data } = await get(
         `https://serverwatch.kaseyhinton.com/server/${ipaddress}`
@@ -211,4 +241,4 @@ class ServerWatcher extends FASTElement {
   }
 }
 
-FASTElement.define(ServerWatcher);
+export default ServerWatcher;
