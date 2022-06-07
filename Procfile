@@ -1,1 +1,1 @@
-web: parcel index.html --no-hmr --port=$PORT
+web: parcel index.html --no-hmr --port $PORT
