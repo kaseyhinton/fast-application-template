@@ -1,1 +1,1 @@
-web: parcel index.html
+web: parcel build && parcel dist/index.html
