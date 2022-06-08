@@ -1,3 +1,4 @@
+import { accentFillRest, neutralColor } from "@microsoft/fast-components";
 import { css } from "@microsoft/fast-element";
 
 const styles = css`
@@ -39,6 +40,25 @@ const styles = css`
     margin-top: 24px;
     justify-content: flex-end;
     gap: 24px;
+  }
+
+  fast-badge {
+    --badge-fill-accent: ${accentFillRest};
+    --badge-color-white: #ffffff;
+  }
+
+  fast-badge[status="Error"],
+  fast-badge[status="Offline"] {
+    --badge-fill-accent: ${neutralColor};
+    --badge-color-white: #ffffff;
+  }
+
+  server-name {
+  }
+
+  fast-badge {
+    display: flex;
+    flex: 1 1 auto;
   }
 
   [spacing-bottom] {

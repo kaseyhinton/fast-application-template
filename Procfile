@@ -1,1 +1,1 @@
-web: parcel index.html --no-hmr
+web: npm start

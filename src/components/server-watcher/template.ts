@@ -1,4 +1,4 @@
-import ServerWatcher, { Server } from "./server-watcher";
+import ServerWatcher, { Server } from ".";
 import { TextField } from "@microsoft/fast-components";
 import { html, repeat } from "@microsoft/fast-element";
 
@@ -6,11 +6,7 @@ const template = html<ServerWatcher>`
   <h1 spacing-bottom>Server Watcher</h1>
 
   <horizontal-row between spacing-bottom>
-    <fast-button
-      @click=${(x, c) => {
-        x.dialogOpen = true;
-      }}
-      appearance="accent"
+    <fast-button @click=${(x) => (x.dialogOpen = true)} appearance="accent"
       >Connect server</fast-button
     >
     <fast-select
@@ -37,7 +33,11 @@ const template = html<ServerWatcher>`
       (x) => x.servers,
       html`
         <server-item>
-          ${(x) => x.name} ${(x) => x.ipaddress} ${(x) => x.status}
+          <server-name> ${(x) => x.name} </server-name>
+          <server-ip>${(x) => x.ipaddress} </server-ip>
+          <fast-badge status=${(x) => x.status} fill="accent" color="white"
+            >${(x) => x.status}</fast-badge
+          >
           <fast-button
             @click=${(x, c) => {
               c.parent.runServerWatch(x);

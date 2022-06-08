@@ -4,24 +4,6 @@ import {
   PaletteRGB,
   SwatchRGB,
 } from "@microsoft/fast-components";
-import {
-  fastButton,
-  fastTextField,
-  fastDialog,
-  fastSelect,
-  fastOption,
-  fastToolbar,
-  provideFASTDesignSystem,
-} from "@microsoft/fast-components";
-
-provideFASTDesignSystem().register(
-  fastButton(),
-  fastTextField(),
-  fastDialog(),
-  fastSelect(),
-  fastOption(),
-  fastToolbar()
-);
 import { parseColorHexRGB } from "@microsoft/fast-colors";
 import {
   FASTElement,
@@ -29,10 +11,19 @@ import {
   css,
   customElement,
   attr,
+  when,
 } from "@microsoft/fast-element";
+import {
+  fastTab,
+  fastTabs,
+  fastTabPanel,
+  provideFASTDesignSystem,
+} from "@microsoft/fast-components";
+
+provideFASTDesignSystem().register(fastTab(), fastTabs(), fastTabPanel());
 import { provideDesignSystem } from "@divriots/starter-furious";
 
-import "./components/server-watcher/server-watcher";
+import "./components/server-watcher/index.ts";
 
 provideDesignSystem().register();
 
@@ -40,8 +31,19 @@ const template = html`
   <fast-toolbar>
     <h3>servertools.kaseyhinton.com</h3>
   </fast-toolbar>
-  ${(x) =>
-    x.page === "server-watcher" ? html`<server-watcher></server-watcher>` : ""}
+  <fast-tabs>
+    <fast-tab slot="tab">Watcher</fast-tab>
+    <fast-tab slot="tab">Details</fast-tab>
+    <fast-tab slot="tab">Controls</fast-tab>
+    <fast-tab-panel slot="tabpanel">
+      ${when(
+        (x) => x.page === "server-watcher",
+        html`<server-watcher></server-watcher>`
+      )}
+    </fast-tab-panel>
+    <fast-tab-panel slot="tabpanel">Server Details</fast-tab-panel>
+    <fast-tab-panel slot="tabpanel">Server Controls</fast-tab-panel>
+  </fast-tabs>
 `;
 const styles = css`
   :host {
@@ -61,11 +63,11 @@ const styles = css`
   }
 `;
 @customElement({
-  name: "my-app",
+  name: "app-main",
   template,
   styles,
 })
-class MyApp extends FASTElement {
+class AppMain extends FASTElement {
   @attr page = "";
 
   connectedCallback() {
@@ -94,4 +96,4 @@ class MyApp extends FASTElement {
   }
 }
 
-export default MyApp;
+export default AppMain;

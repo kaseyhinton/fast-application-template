@@ -1,11 +1,30 @@
-import { get } from "httpie";
 import {
   FASTElement,
   observable,
   customElement,
 } from "@microsoft/fast-element";
-import template from "./template.server-watcher";
-import styles from "./styles.server-watcher";
+import template from "./template";
+import styles from "./styles";
+import {
+  fastButton,
+  fastTextField,
+  fastDialog,
+  fastSelect,
+  fastOption,
+  fastToolbar,
+  fastBadge,
+  provideFASTDesignSystem,
+} from "@microsoft/fast-components";
+
+provideFASTDesignSystem().register(
+  fastButton(),
+  fastTextField(),
+  fastDialog(),
+  fastSelect(),
+  fastOption(),
+  fastToolbar(),
+  fastBadge()
+);
 
 export type Server = {
   name: string;
@@ -71,10 +90,10 @@ class ServerWatcher extends FASTElement {
 
   async getDataFromIP(ipaddress: string) {
     try {
-      const { data } = await get(
+      const response = await fetch(
         `https://serverwatch.kaseyhinton.com/server/${ipaddress}`
       );
-      return data;
+      return response.json();
     } catch (err) {
       return "Error";
     }
