@@ -12,7 +12,7 @@ import {
 } from "@microsoft/fast-components";
 provideFASTDesignSystem().register(fastTab(), fastTabs(), fastTabPanel());
 
-import "./components/server-watcher.js";
+import "./components/server-watcher.mjs";
 
 class AppMain extends LitElement {
   static properties = {
@@ -20,9 +20,6 @@ class AppMain extends LitElement {
   };
 
   async firstUpdated() {
-    const provider = this.shadowRoot.querySelector(
-      "fast-design-system-provider"
-    );
     baseLayerLuminance.withDefault(StandardLuminance.LightMode);
     accentPalette.withDefault(
       PaletteRGB.from(SwatchRGB.from(parseColorHexRGB("#335599")))
@@ -46,16 +43,17 @@ class AppMain extends LitElement {
 
   async changePage(path, resolve) {
     switch (path) {
+      case "/":
       case "/server-watcher":
-        await import("./components/server-watcher.js");
+        await import("./components/server-watcher.mjs");
         this.page = "server-watcher";
         break;
       case "/server-details":
-        await import("./components/server-details.js");
+        await import("./components/server-details.mjs");
         this.page = "server-details";
         break;
       case "/server-controls":
-        await import("./components/server-controls.js");
+        await import("./components/server-controls.mjs");
         this.page = "server-controls";
         break;
       default:
@@ -74,67 +72,66 @@ class AppMain extends LitElement {
         margin-top: 49px;
       }
 
-      fast-design-system-provider {
-        display: block;
-      }
-
       fast-toolbar {
         width: 100%;
-        padding: 12px;
+        padding: 24px;
         top: 0;
         position: fixed;
+      }
+
+      fast-tabs {
+        position: relative;
+        top: 24px;
       }
     `,
   ];
 
   render() {
     return html`
-      <fast-design-system-provider>
-        <fast-toolbar>
-          <h3>servertools.kaseyhinton.com</h3>
-        </fast-toolbar>
-        <fast-tabs activeid=${this.page}>
-          <fast-tab
-            id="server-watcher"
-            @click=${() => {
-              navigation.navigate("/server-watcher");
-            }}
-            slot="tab"
-            >Watcher</fast-tab
-          >
-          <fast-tab
-            id="server-details"
-            @click=${() => {
-              navigation.navigate("/server-details");
-            }}
-            slot="tab"
-            >Details</fast-tab
-          >
-          <fast-tab
-            id="server-controls"
-            @click=${() => {
-              navigation.navigate("/server-controls");
-            }}
-            slot="tab"
-            >Controls</fast-tab
-          >
-          <fast-tab-panel slot="tabpanel">
-            ${this.page === "server-watcher"
-              ? html`<server-watcher></server-watcher>`
-              : nothing}
-          </fast-tab-panel>
-          <fast-tab-panel slot="tabpanel">
-            ${this.page === "server-details"
-              ? html`<server-details></server-details>`
-              : nothing}
-          </fast-tab-panel>
-          <fast-tab-panel slot="tabpanel">
-            ${this.page === "server-controls"
-              ? html`<server-controls></server-controls>`
-              : nothing}
-          </fast-tab-panel>
-        </fast-tabs>
-      </fast-design-system-provider>
+      <fast-toolbar>
+        <h3>servertools.kaseyhinton.com</h3>
+      </fast-toolbar>
+      <fast-tabs activeid=${this.page}>
+        <fast-tab
+          id="server-watcher"
+          @click=${() => {
+            navigation.navigate("/server-watcher");
+          }}
+          slot="tab"
+          >Watcher</fast-tab
+        >
+        <fast-tab
+          id="server-details"
+          @click=${() => {
+            navigation.navigate("/server-details");
+          }}
+          slot="tab"
+          >Details</fast-tab
+        >
+        <fast-tab
+          id="server-controls"
+          @click=${() => {
+            navigation.navigate("/server-controls");
+          }}
+          slot="tab"
+          >Controls</fast-tab
+        >
+        <fast-tab-panel slot="tabpanel">
+          ${this.page === "server-watcher"
+            ? html`<server-watcher></server-watcher>`
+            : nothing}
+        </fast-tab-panel>
+        <fast-tab-panel slot="tabpanel">
+          ${this.page === "server-details"
+            ? html`<server-details></server-details>`
+            : nothing}
+        </fast-tab-panel>
+        <fast-tab-panel slot="tabpanel">
+          ${this.page === "server-controls"
+            ? html`<server-controls></server-controls>`
+            : nothing}
+        </fast-tab-panel>
+      </fast-tabs>
     `;
   }
 }

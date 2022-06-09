@@ -4,17 +4,18 @@
   "description": "",
   "source": "index.html",
   "scripts": {
-    "start": "rimraf ./dist && parcel serve",
-    "build": "parcel build --no-source-maps"
+    "start": "npm run build && node server.js",
+    "build": "esbuild src/app-main.mjs --bundle --outfile=build/index.js && cpy index.html build"
   },
   "dependencies": {
     "@microsoft/fast-components": "^2.30.6",
     "@microsoft/fast-element": "^1.10.2",
+    "cpy-cli": "^4.1.0",
     "lit": "2.2.5"
   },
   "devDependencies": {
-    "parcel": "^2.6.0",
-    "process": "^0.11.10",
-    "rimraf": "3.0.2"
+    "@polka/send-type": "^0.5.2",
+    "esbuild": "^0.14.43",
+    "polka": "^0.5.2"
   }
 }
