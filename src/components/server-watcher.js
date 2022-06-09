@@ -103,6 +103,7 @@ class ServerWatcher extends LitElement {
       server-item {
         display: flex;
         align-items: center;
+        flex-wrap: wrap;
         gap: 24px;
         padding: 12px;
         border-bottom: 1px solid #eee;
