@@ -12,8 +12,6 @@ import {
 } from "@microsoft/fast-components";
 provideFASTDesignSystem().register(fastTab(), fastTabs(), fastTabPanel());
 
-import "./components/server-watcher.mjs";
-
 class AppMain extends LitElement {
   static properties = {
     page: { type: String, state: true },
@@ -45,15 +43,15 @@ class AppMain extends LitElement {
     switch (path) {
       case "/":
       case "/server-watcher":
-        await import("./components/server-watcher.mjs");
+        await import("./components/server-watcher.js");
         this.page = "server-watcher";
         break;
       case "/server-details":
-        await import("./components/server-details.mjs");
+        await import("./components/server-details.js");
         this.page = "server-details";
         break;
       case "/server-controls":
-        await import("./components/server-controls.mjs");
+        await import("./components/server-controls.js");
         this.page = "server-controls";
         break;
       default:
