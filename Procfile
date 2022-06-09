@@ -1,1 +1,1 @@
-web: npm run build && http-server-spa build
+web: npm run build && servor build build $PORT

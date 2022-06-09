@@ -4,7 +4,7 @@
   "description": "",
   "source": "index.html",
   "scripts": {
-    "start": "npm run build && http-server-spa build",
+    "start": "npm run build && servor build",
     "build": "rimraf build && esbuild src/app-main.js --splitting --bundle --format=esm --minify --outdir=build && cpy index.html build"
   },
   "dependencies": {
@@ -14,7 +14,7 @@
   },
   "devDependencies": {
     "esbuild": "^0.14.43",
-    "http-server-spa": "^1.3.0",
+    "servor": "4.0.2",
     "rimraf": "3.0.2",
     "cpy-cli": "^4.1.0"
   }
