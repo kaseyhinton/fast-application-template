@@ -1,1 +1,1 @@
-web: npm start
+web: npm run build && http-server-spa build
