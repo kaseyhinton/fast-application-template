@@ -1,1 +1,1 @@
-web: npm run build && servor build build $PORT
+web: npm run build && servor build index.html $PORT --silent
